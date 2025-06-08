@@ -5,7 +5,8 @@ import fileUpload from 'express-fileupload';
 import bodyParser from 'body-parser';
 
 
-import userRouter from './routes/user.routes.js'
+import userRoutes from './routes/user.routes.js'
+import videoRoutes from './routes/video.routes.js';
 
 dotenv.config();
 
@@ -20,7 +21,8 @@ app.use(fileUpload({
     tempFileDir:"/tmp/"
 }))
 
-app.use('/api/user',userRouter)
+app.use('/api/user',userRoutes)
+app.use('/api/video/',videoRoutes)
 
 
 app.listen(process.env.PORT,()=>{
