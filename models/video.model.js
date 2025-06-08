@@ -38,25 +38,12 @@ const videoSchema = new mongoose.Schema({
         trim: true,    // This removes any spaces at the beginning or end
 
     },
-    tags: {
-        type: String,
-        trim: true,
-    },
-    likes: {
-        type: String,
-        default: 0,
-        min: 0,
-    },
-    dislikes: {
-        type: Number,
-        default: 0,
-        min: 0,
-    },
-    views: {
-        type: Number,
-        default: 0,
-        min: 0,
-    },
+    tags: [
+        {
+            type:String,
+            trim:true,
+        }
+    ],
     likedBy: {
         type: [
             {
@@ -78,6 +65,24 @@ const videoSchema = new mongoose.Schema({
         }
     ],
 }, { timestamps: true });
+
+
+videoSchema.virtual('likes').get(function(){
+    return this.likedBy.length;
+})
+
+videoSchema.virtual('dislikes').get(function(){
+    return this.disLinkedBy.length;
+})
+
+
+videoSchema.virtual('views').get(function (){
+    return this.viewedBy.length
+})
+
+videoSchema.set('toJSON',{
+    virtuals :true,
+})
 
 
 const videoModel= mongoose.model('Video',videoSchema);

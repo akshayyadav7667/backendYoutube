@@ -40,14 +40,72 @@ router.post('/upload', checkAuth, async (req, res) => {
             videoId: videoUpload.public_id,
             thumbnailUrl: thumbnailUpload.secure_url,
             thumbnailId: thumbnailUpload.public_id,
+            user_id: req.user.id
 
         })
+
+        await newVideo.save()
 
         res.status(200).json({ message: "video uploaded", newVideo });
     } catch (error) {
         res.status(500).json({ message: error.message });
 
     }
+})
+
+
+
+router.put('/update/:id',checkAuth,async(req,res)=>{
+    try {
+        const {title,description,category,tags}= req.body;
+
+        const videoId= req.params.id;
+
+        // find video by id
+        let video= await Video.findById(videoId);
+        // console.log(video)
+
+        if(!video)
+        {
+            return res.status(404).json({error:"Video not found "})
+        };
+
+        if(video.user_id.toString()!== req.user.id.toString())
+        {
+            return res.status(401).json({error:"UnAuthorized"});
+        }
+
+
+        if(req.files && req.files.thumbnailUrl)
+        {
+            await cloudinary.uploader.destroy(video.thumbnailId);
+
+            const thumbnailUpload = await cloudinary.uploader.upload(req.files.thumbnailUrl.tempFilePath,{
+                folder:"Youtube/thumbnails"
+            })
+
+            video.thumbnailUrl= thumbnailUpload.secure_url,
+            video.thumbnailId= thumbnailUpload.public_id
+        }
+
+        video.title= title || video.title,
+        video.description= description || video.description,
+        video.category = category || video.category,
+        video.tags= tags? tags.split(","): video.tags;
+
+        await video.save();
+        res.status(201).json({message:"Updated successfully",video})
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+})
+
+
+// delete Video 
+
+router.delete("/delete/:id", checkAuth,(req,res)=>{
+
 })
 
 
