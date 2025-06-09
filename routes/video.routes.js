@@ -163,17 +163,59 @@ router.get("/all", async (req, res) => {
 // GET my video
 router.get('/my-videos', checkAuth, async (req, res) => {
     try {
-        const videos= await Video.findById({user_id:req.body.id}).sort({createdAt:-1});
+        const videos= await Video.find({user_id:req.user.id}).sort({createdAt:-1});
 
         res.status(200).json(videos);
-        
+
     } catch (error) {
         console.log(error);
         res.status(500).json({ error: "Somethings went wrong ", message: error.message });
     }
 })
 
+// GET video by Id
 
+router.get('/:id',checkAuth, async (req,res)=>{
+    try {
+        const videoId= req.params.id;
+        const userId= req.user.id;
+
+
+        
+
+        const video= await Video.findByIdAndUpdate(
+            videoId,
+            {
+                $addToSet :{
+                    viewedBy : userId
+                },
+                
+            },
+            { new: true}
+        )
+
+
+        if(!video)
+        {
+            return res.status(404).json({error:"Video not found"});
+        }
+
+
+        res.status(200).json(video);
+        
+
+
+    } catch (error) {
+        console.log("Fetch Error",error);
+        res.status(500).json({message:"Somethings wents wrong "});
+    }
+})
+
+// get videos by category 
+
+router.get("/category/:category", async(req,res)=>{
+    
+})
 
 
 export default router;

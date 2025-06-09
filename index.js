@@ -22,7 +22,7 @@ app.use(fileUpload({
 }))
 
 app.use('/api/user',userRoutes)
-app.use('/api/video/',videoRoutes)
+app.use('/api/video',videoRoutes)
 
 
 app.listen(process.env.PORT,()=>{
