@@ -163,7 +163,7 @@ router.get("/all", async (req, res) => {
 // GET my video
 router.get('/my-videos', checkAuth, async (req, res) => {
     try {
-        const videos= await Video.find({user_id:req.user.id}).sort({createdAt:-1});
+        const videos = await Video.find({ user_id: req.user.id }).sort({ createdAt: -1 });
 
         res.status(200).json(videos);
 
@@ -175,47 +175,143 @@ router.get('/my-videos', checkAuth, async (req, res) => {
 
 // GET video by Id
 
-router.get('/:id',checkAuth, async (req,res)=>{
+router.get('/:id', checkAuth, async (req, res) => {
     try {
-        const videoId= req.params.id;
-        const userId= req.user.id;
+        const videoId = req.params.id;
+        const userId = req.user.id;
 
 
-        
 
-        const video= await Video.findByIdAndUpdate(
+
+        const video = await Video.findByIdAndUpdate(
             videoId,
             {
-                $addToSet :{
-                    viewedBy : userId
+                $addToSet: {
+                    viewedBy: userId
                 },
-                
+
             },
-            { new: true}
+            { new: true }
         )
 
 
-        if(!video)
-        {
-            return res.status(404).json({error:"Video not found"});
+        if (!video) {
+            return res.status(404).json({ error: "Video not found" });
         }
 
 
         res.status(200).json(video);
-        
+
 
 
     } catch (error) {
-        console.log("Fetch Error",error);
-        res.status(500).json({message:"Somethings wents wrong "});
+        console.log("Fetch Error", error);
+        res.status(500).json({ message: "Somethings wents wrong " });
     }
 })
 
 // get videos by category 
 
-router.get("/category/:category", async(req,res)=>{
-    
+router.get("/category/:category", async (req, res) => {
+    try {
+        const catogery_item = req.params.category;
+
+        const video = await Video.find({ category: catogery_item }).sort({ createdAt: -1 });
+
+        // console.log(video);
+
+        res.status(200).json(video);
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Somethings wents wrong !" });
+    }
 })
+
+// Get the tags 
+router.get("/tags/:tags", async (req, res) => {
+    try {
+        const tags = req.params.tags;
+
+        const video = await Video.find({ tags: tags }).sort({ createdAt: -1 });
+
+
+        // console.log(video);
+
+        res.status(200).json({ video });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Somethings wents wrong !" });
+    }
+})
+
+// video likes
+
+router.post('/like', checkAuth, async  (req, res) => {
+    try {
+        const { videoId } = req.body;
+        const userId = req.user.id;
+
+        // console.log("userId",userId);
+
+        // console.log("videoId",videoId);
+
+        const video= await Video.findByIdAndUpdate(
+            videoId,
+            {
+                $addToSet:{
+                    likedBy : userId
+                },
+                $pull:{
+                    disLikedBy: userId
+                }
+            },
+            {new:true}
+
+        )
+        // console.log(video)
+
+        res.status(200).json("Liked the video", video)
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Somethings wents wrong !" });
+    }
+})
+
+
+// diliked the video
+
+router.post("/dislike",checkAuth, async (req,res)=>{
+    try {
+        const {videoId}= req.body;
+        const  userId= req.user.id;
+
+        const video= await Video.findByIdAndUpdate(
+            videoId,
+            {
+                $addToSet:{
+                    disLikedBy: userId
+                },
+                $pull:{
+                    likedBy: userId
+                }
+            },
+            {new:true},
+        )
+
+        // console.log("userId",userId)
+        // console.log("video",video);
+
+        res.status(200).json({message:"Disliked the video"});
+    } catch (error) {
+        console.log(error);
+        res.status(500).json("somethings wents wrong !");
+    }
+})
+
+
 
 
 export default router;

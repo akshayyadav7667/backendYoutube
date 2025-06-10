@@ -52,7 +52,7 @@ const videoSchema = new mongoose.Schema({
             }
         ]
     },
-    disLinkedBy: [
+    disLikedBy: [
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
@@ -72,7 +72,7 @@ videoSchema.virtual('likes').get(function(){
 })
 
 videoSchema.virtual('dislikes').get(function(){
-    return this.disLinkedBy.length;
+    return this.disLikedBy.length;
 })
 
 

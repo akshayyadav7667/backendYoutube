@@ -12,13 +12,12 @@ router.post('/signup', async (req, res) => {
 
     try {
 
-        const {email}= req.body;
-        
-        const isUser= await User.findOne({email});
+        const { email } = req.body;
 
-        if(isUser)
-        {
-            return  res.status(201).json({message:"User already Exists !"});
+        const isUser = await User.findOne({ email });
+
+        if (isUser) {
+            return res.status(201).json({ message: "User already Exists !" });
         }
 
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -26,10 +25,10 @@ router.post('/signup', async (req, res) => {
         // console.log(req.files.logoUrl.tempFilePath)
 
         const uploadImage = await cloudinary.uploader.upload(
-            req.files.logoUrl.tempFilePath,{
-                folder:"Youtube/UserProfile"
-            }
-            
+            req.files.logoUrl.tempFilePath, {
+            folder: "Youtube/UserProfile"
+        }
+
         )
 
         // console.log("Image", uploadImage);
@@ -112,8 +111,8 @@ router.put('/update-profile', checkAuth, async (req, res) => {
             }
 
 
-            const uploadedImage = await cloudinary.uploader.upload(req.files.logoUrl.tempFilePath,{
-                folder:"Youtube/UserProfile"
+            const uploadedImage = await cloudinary.uploader.upload(req.files.logoUrl.tempFilePath, {
+                folder: "Youtube/UserProfile"
             });
 
             updateData.logoUrl = uploadedImage.secure_url;
@@ -134,6 +133,57 @@ router.put('/update-profile', checkAuth, async (req, res) => {
 })
 
 
+
+// subscribe the channel
+
+router.post('/subscribe', checkAuth, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const {channelUserId} = req.body;
+
+        // check the the channeluserID is same to the userID , same person doesn't subscribe the channel
+        if (userId == channelUserId) {
+            return res.status(404).json({ message: "You are not allowed to subscribe your own channel " })
+        }
+
+        // console.log(subscribed_by_me)
+
+        // console.log(userId);
+        // console.log(channelUserId)
+
+        // subscirbe the channel
+        const subscribed_by_me = await User.findByIdAndUpdate(
+            userId,
+            {
+                $addToSet: {
+                    subscribedChannels: channelUserId
+                }
+            },
+            { new: true },
+        )
+
+        const subscribedUser= await User.findByIdAndUpdate(
+            channelUserId,
+            {
+                $inc:{
+                    subscribers:1
+                }
+            }
+        )
+
+        // console.log(subscribed_by_me)
+
+        // console.log(userId);
+        // console.log(channelUserId)
+
+        res.status(200).json("Subscribed done ");
+
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json(error);
+    }
+})
 
 
 export default router;  
