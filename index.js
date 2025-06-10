@@ -7,6 +7,7 @@ import bodyParser from 'body-parser';
 
 import userRoutes from './routes/user.routes.js'
 import videoRoutes from './routes/video.routes.js';
+import commentRoutes from './routes/comment.routes.js'
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use(fileUpload({
 
 app.use('/api/user',userRoutes)
 app.use('/api/video',videoRoutes)
+app.use('/api/comment',commentRoutes)
 
 
 app.listen(process.env.PORT,()=>{
